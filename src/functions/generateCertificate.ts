@@ -31,7 +31,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   const { id, name, grade } = JSON.parse(event.body) as ICreateCertificate
 
   const response = await document.query({
-    TableName: "users_certificates",
+    TableName: "certificates",
     KeyConditionExpression: "id = :id",
     ExpressionAttributeValues: {
       ":id": id
@@ -39,7 +39,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   }).promise()
 
   await document.put({
-    TableName: "users_certificates",
+    TableName: "certificates",
     Item: {
       id,
       name,

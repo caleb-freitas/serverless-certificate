@@ -1,7 +1,7 @@
 import type { AWS } from '@serverless/typescript';
 
 const serverlessConfiguration: AWS = {
-  service: 'certificate',
+  service: 'certificates',
   frameworkVersion: '3',
   plugins: ['serverless-esbuild', 'serverless-dynamodb-local', 'serverless-offline'],
   provider: {
@@ -29,7 +29,6 @@ const serverlessConfiguration: AWS = {
       }
     ]
   },
-  // import the function via paths
   functions: {
     generateCertificate: {
       handler: "src/functions/generateCertificate.handler",
@@ -52,7 +51,7 @@ const serverlessConfiguration: AWS = {
       }]
     }
   },
-  package: { individually: true },
+  package: { individually: true, include: ["./src/templates/**"] },
   custom: {
     esbuild: {
       bundle: true,
@@ -79,7 +78,7 @@ const serverlessConfiguration: AWS = {
       dbCertificateUsers: {
         Type: "AWS::DynamoDB::Table",
         Properties: {
-          TableName: "users_certificates",
+          TableName: "certificates",
           ProvisionedThroughput: {
             ReadCapacityUnits: 5,
             WriteCapacityUnits: 5

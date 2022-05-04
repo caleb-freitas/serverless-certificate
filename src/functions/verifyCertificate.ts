@@ -4,7 +4,7 @@ import { document } from "../utils/dynamodb.client"
 export const handler: APIGatewayProxyHandler = async (event) => {
   const { id } = event.pathParameters
   const response = await document.query({
-    TableName: "users_certificates",
+    TableName: "certificates",
     KeyConditionExpression: "id = :id",
     ExpressionAttributeValues: {
       ":id": id
