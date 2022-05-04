@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { APIGatewayProxyHandler } from "aws-lambda"
+import { S3 } from "aws-sdk"
 import { compile } from "handlebars"
 import dayjs from "dayjs"
 import chromium from "chrome-aws-lambda"
@@ -29,20 +30,20 @@ const compileTemplate = async (data: ICertificateTemplate) => {
 export const handler: APIGatewayProxyHandler = async (event) => {
   const { id, name, grade } = JSON.parse(event.body) as ICreateCertificate
 
+  const response = await document.query({
+    TableName: "users_certificates",
+    KeyConditionExpression: "id = :id",
+    ExpressionAttributeValues: {
+      ":id": id
+    }
+  }).promise()
+
   await document.put({
     TableName: "users_certificates",
     Item: {
       id,
       name,
       grade,
-    }
-  }).promise()
-
-  const response = await document.query({
-    TableName: "users_certificates",
-    KeyConditionExpression: "id = :id",
-    ExpressionAttributeValues: {
-      ":id": id
     }
   }).promise()
 
@@ -78,8 +79,25 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
   await browser.close()
 
+  const s3 = new S3()
+
+  await s3.createBucket({
+    Bucket: "ignite-certificate-caleb1"
+  }).promise()
+
+  await s3.putObject({
+    Bucket: "ignite-certificate-caleb1",
+    Key: `${id}.pdf`,
+    ACL: "public-read",
+    Body: pdf,
+    ContentType: "application/pdf"
+  }).promise()
+
   return {
     statusCode: 201,
-    body: JSON.stringify(response.Items[0])
+    body: JSON.stringify({
+      message: "certificate generated with success",
+      url: `https://ignite-certificate-caleb1.s3.amazonaws.com/${id}.pdf`
+    })
   }
 }
